@@ -1,47 +1,52 @@
 //Importações
 const express = require('express')
 const app = express()
+const handlebars = require('express-handlebars')
+const bodyParser = require('body-parser')
+const Post = require('./models/post')
 
-app.use(express.json())
+//Configurações
+app.engine('handlebars', handlebars({defaultLayout: 'main'}))
+app.set('view engine', 'handlebars')
 
-//Lista de compras
-const compras = ['arroz', 'feijão', 'carne']
-
-//Retorna uma compra
-app.get('/compras/:index', (req,res)=>{
-    const {index} = req.params
-    return res.json(compras[index])
-})
-
-//Retorna todas as compras
-app.get('/compras', (req,res)=>{
-    return res.json(compras)
-})
-
-//Add compra
-app.post('/compras', (req,res)=>{
-    const {name} = req.body
-    compras.push(name)
-    return res.json(compras)
-})
-
-//Mudar compra
-app.put('/compras/:index', (req,res)=>{
-    const {index} = req.params
-    const {name} = req.body
-    
-    compras[index]= name
-    return res.json(compras)
-})
-
-//Deletar compra
-app.delete('/compras/:index',(req,res)=>{
-    const {index} = req.params
-
-    compras.splice(index, 1)
-    return res.json({ message: "O Curso foi deletado!"})
-})
+app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.json())
 
 
+//Rotas
+
+    //Home
+    app.get('/', (req, res)=>{
+        Post.findAll().then((lista)=>{
+            res.render('home',{lista: lista})
+        })
+        
+    })
+
+
+    //Add item de compra
+    app.get('/cad', (req,res)=>{
+        res.render('form')
+    })
+
+    app.post('/add', (req,res)=>{
+        Post.create({
+            name: req.body.item
+        }).then(()=>{
+            res.redirect('/')
+        }).catch((err)=>{
+            res.send('Errooou'+err)
+        })
+    })
+
+    //Deletar item
+    app.get('/deletar/:id',(req, res)=>{
+        Post.destroy({where: {'id': req.params.id}}
+        ).then(()=>{
+            res.redirect('/')
+        }).catch((err)=>{
+            res.send('item não existe')
+        })
+    })
 
 app.listen('3000')

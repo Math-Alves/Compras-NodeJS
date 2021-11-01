@@ -1,0 +1,10 @@
+<h1>LISTA DE COMPRAS:</h1>
+<a href="/cad"><button>ADD ITENS</button></a>
+
+{{#each lista}}
+
+<p>{{dataValues.name}}
+<a href="/deletar/{{dataValues.id}}"><button>DELETAR</button></a></p>
+<hr>
+
+{{/each}}
